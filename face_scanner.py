@@ -13,3 +13,13 @@ THEMES = {
     "BLOOD":     {"mesh": (40, 40, 255),   "text": (200, 200, 255), "accent": (0, 200, 255)},
 }
 START_THEME = "SYNTHWAVE"
+
+# Mesh look
+GLOW_STRENGTH = 0.9        # 0 = no glow, 1+ = very glowy
+GLOW_BLUR = 7              # bigger = softer glow
+MESH_OPACITY = 0.55
+
+# Text
+TEXT_FONT = cv2.FONT_HERSHEY_DUPLEX
+TEXT_SCALE = 0.6
+TEXT_THICK = 1
