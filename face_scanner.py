@@ -3,7 +3,8 @@ import cv2
 import mediapipe as mp
 import numpy as np
 
-YOUR_NAME = "Muhammad Rayan"     # can be changed to whoevers .
+YOUR_NAME = "Muhammad Rayan"     # can be changed to whoevers 
+
 # Themes are (B, G, R). Press T while running to cycle through them.
 THEMES = {
     "SYNTHWAVE": {"mesh": (200, 0, 255),   "text": (255, 255, 0),   "accent": (0, 140, 255)},
