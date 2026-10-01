@@ -23,3 +23,18 @@ MESH_OPACITY = 0.55
 TEXT_FONT = cv2.FONT_HERSHEY_DUPLEX
 TEXT_SCALE = 0.6
 TEXT_THICK = 1
+
+
+# Mouth ring (placed to the left of the face)
+MOUTH_RING_DIST = 110      # how far left of the face the ring sits
+MOUTH_RING_MIN = 8
+MOUTH_RING_MAX = 55
+MOUTH_OPEN_FULL = 0.16     # lip gap / face height that counts as 100% open
+
+# Head roll gauge (above the head)
+ROLL_GAP = 70              # distance above the head
+ROLL_LINE_HALF = 80
+
+# Eye tiles (top-right)
+EYE_TILE = 140
+EYE_OPEN_THRESHOLD = 0.22  # lower = harder to count as closed
