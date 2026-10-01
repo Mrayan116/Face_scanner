@@ -38,3 +38,7 @@ ROLL_LINE_HALF = 80
 # Eye tiles (top-right)
 EYE_TILE = 140
 EYE_OPEN_THRESHOLD = 0.22  # lower = harder to count as closed
+
+# Camera
+CAM_INDEX = 0
+FRAME_W, FRAME_H = 1280, 720
