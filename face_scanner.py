@@ -42,3 +42,21 @@ EYE_OPEN_THRESHOLD = 0.22  # lower = harder to count as closed
 # Camera
 CAM_INDEX = 0
 FRAME_W, FRAME_H = 1280, 720
+
+# =====================================================================
+#  Landmarks
+# =====================================================================
+mp_face_mesh = mp.solutions.face_mesh
+LEFT_EYE_IDX = [33, 133, 159, 145]
+RIGHT_EYE_IDX = [362, 263, 386, 374]
+MOUTH_TOP, MOUTH_BOTTOM = 13, 14
+FOREHEAD, CHIN = 10, 152
+
+
+# =====================================================================
+#  Helpers
+# =====================================================================
+def eye_ratio(pts, idx):
+    hor = np.linalg.norm(pts[idx[0]] - pts[idx[1]])
+    ver = np.linalg.norm(pts[idx[2]] - pts[idx[3]])
+    return ver / hor if hor else 0
