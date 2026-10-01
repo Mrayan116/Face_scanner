@@ -132,3 +132,78 @@ def eye_ratio(pts, idx):
     hor = np.linalg.norm(pts[idx[0]] - pts[idx[1]])
     ver = np.linalg.norm(pts[idx[2]] - pts[idx[3]])
     return ver / hor if hor else 0
+
+           status = "NO SUBJECT"
+
+            if results.multi_face_landmarks:
+                lm = results.multi_face_landmarks[0].landmark
+                pts = np.array([[p.x * w, p.y * h] for p in lm])
+                status = "LOCKED"
+
+                if show_mesh:
+                    image = glowing_mesh(image, pts, MESH)
+
+                # Bounding box + brackets
+                x1, y1 = pts[:, 0].min().astype(int), pts[:, 1].min().astype(int)
+                x2, y2 = pts[:, 0].max().astype(int), pts[:, 1].max().astype(int)
+                corner_brackets(image, x1 - 15, y1 - 15, x2 + 15, y2 + 15, ACC)
+                put_text(image, f"SUBJECT: {YOUR_NAME}", (x1 - 15, y2 + 45), ACC)
+
+                # ---- Blinks (both eyes together, counted once) ----
+                ear_l = eye_ratio(pts, LEFT_EYE_IDX)
+                ear_r = eye_ratio(pts, RIGHT_EYE_IDX)
+                left_open = ear_l > EYE_OPEN_THRESHOLD
+                right_open = ear_r > EYE_OPEN_THRESHOLD
+                closed = (not left_open) and (not right_open)
+                if closed and not eyes_closed_prev:
+                    blinks += 1
+                eyes_closed_prev = closed
+
+                # ---- Eye tiles (top-right) ----
+                tile, pad = EYE_TILE, 20
+                sx = w - tile - pad
+                for n, (idx, is_open, label) in enumerate([
+                    (LEFT_EYE_IDX, left_open, "L-EYE"),
+                    (RIGHT_EYE_IDX, right_open, "R-EYE"),
+                ]):
+                    c = pts[idx[:4]].mean(axis=0).astype(int)
+                    sy = pad + n * (tile + 50)
+                    image[sy:sy + tile, sx:sx + tile] = crop_square(image, tuple(c), tile)
+                    corner_brackets(image, sx - 4, sy - 4, sx + tile + 4, sy + tile + 4, MESH, 18, 2)
+                    put_text(image, f"{label}: {'OPEN' if is_open else 'CLOSED'}",
+                             (sx, sy + tile + 28), TXT)
+
+
+                # ---- Head roll (real angle in degrees) ----
+                p_l, p_r = pts[LEFT_EYE_IDX[0]], pts[RIGHT_EYE_IDX[1]]
+                angle = np.degrees(np.arctan2(p_r[1] - p_l[1], p_r[0] - p_l[0]))
+                cx = int((x1 + x2) / 2)
+                cy = int(y1 - ROLL_GAP)
+                dy = int(np.tan(np.radians(angle)) * ROLL_LINE_HALF)
+                cv2.line(image, (cx - ROLL_LINE_HALF, cy - dy), (cx + ROLL_LINE_HALF, cy + dy), MESH, 3, cv2.LINE_AA)
+                cv2.circle(image, (cx, cy), 5, ACC, -1, cv2.LINE_AA)
+                put_text(image, f"ROLL {angle:+.1f} deg", (cx - 65, cy - 25), TXT)
+
+                # ---- Mouth ring (scales with face size, so distance doesn't matter) ----
+                lip_gap = np.linalg.norm(pts[MOUTH_TOP] - pts[MOUTH_BOTTOM])
+                face_h = np.linalg.norm(pts[FOREHEAD] - pts[CHIN])
+                openness = min(1.0, (lip_gap / face_h) / MOUTH_OPEN_FULL)
+                radius = int(MOUTH_RING_MIN + openness * (MOUTH_RING_MAX - MOUTH_RING_MIN))
+                mx = int(x1 - MOUTH_RING_DIST)
+                my = int((pts[MOUTH_TOP][1] + pts[MOUTH_BOTTOM][1]) / 2)
+                # faint guide ring (max size) + live ring + filled core
+                cv2.circle(image, (mx, my), MOUTH_RING_MAX, MESH, 1, cv2.LINE_AA)
+                cv2.circle(image, (mx, my), radius, ACC, 2, cv2.LINE_AA)
+                cv2.circle(image, (mx, my), max(2, radius // 3), MESH, -1, cv2.LINE_AA)
+                put_text(image, f"MOUTH {int(openness * 100)}%", (mx - 50, my - MOUTH_RING_MAX - 12), TXT)
+
+            # ---- HUD panel (top-left) ----
+            elapsed = int(time.time() - t_start)
+            put_text(image, f"// {theme_names[theme_i]} SCANNER", (20, 35), ACC, 0.8)
+            put_text(image, f"STATUS : {status}", (20, 65), TXT)
+            put_text(image, f"BLINKS : {blinks}", (20, 90), TXT)
+            put_text(image, f"FPS    : {fps:4.1f}", (20, 115), TXT)
+            put_text(image, f"UPTIME : {elapsed // 60:02d}:{elapsed % 60:02d}", (20, 140), TXT)
+            put_text(image, "[T] theme  [W] mesh  [R] reset  [S] snap  [Q] quit",
+                     (20, h - 20), TXT, 0.5)
+
