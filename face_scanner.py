@@ -92,6 +92,21 @@ def crop_square(image, center, size):
         return np.zeros((size, size, 3), np.uint8)
     return cv2.resize(crop, (size, size))
 
+# =====================================================================
+#  Main
+# =====================================================================
+def main():
+    cap = cv2.VideoCapture(CAM_INDEX)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_W)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_H)
+
+    theme_names = list(THEMES)
+    theme_i = theme_names.index(START_THEME)
+    show_mesh = True
+    blinks = 0
+    eyes_closed_prev = False
+    t_prev, fps = time.time(), 0.0
+    t_start = time.time()
 def eye_ratio(pts, idx):
     hor = np.linalg.norm(pts[idx[0]] - pts[idx[1]])
     ver = np.linalg.norm(pts[idx[2]] - pts[idx[3]])
