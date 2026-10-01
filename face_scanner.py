@@ -60,3 +60,39 @@ def eye_ratio(pts, idx):
     hor = np.linalg.norm(pts[idx[0]] - pts[idx[1]])
     ver = np.linalg.norm(pts[idx[2]] - pts[idx[3]])
     return ver / hor if hor else 0
+
+
+def put_text(img, text, pos, color, scale=TEXT_SCALE):
+    """Text with a dark outline so it stays readable on any background."""
+    cv2.putText(img, text, pos, TEXT_FONT, scale, (0, 0, 0), TEXT_THICK + 3, cv2.LINE_AA)
+    cv2.putText(img, text, pos, TEXT_FONT, scale, color, TEXT_THICK, cv2.LINE_AA)
+
+
+def corner_brackets(img, x1, y1, x2, y2, color, length=30, thick=3):
+    for (x, y, dx, dy) in [(x1, y1, 1, 1), (x2, y1, -1, 1), (x1, y2, 1, -1), (x2, y2, -1, -1)]:
+        cv2.line(img, (x, y), (x + dx * length, y), color, thick, cv2.LINE_AA)
+        cv2.line(img, (x, y), (x, y + dy * length), color, thick, cv2.LINE_AA)
+
+
+def glowing_mesh(image, pts, color):
+    layer = np.zeros_like(image)
+    for i, j in mp_face_mesh.FACEMESH_TESSELATION:
+        cv2.line(layer, tuple(pts[i].astype(int)), tuple(pts[j].astype(int)), color, 1, cv2.LINE_AA)
+    glow = cv2.GaussianBlur(layer, (0, 0), GLOW_BLUR)
+    out = cv2.addWeighted(image, 1.0, glow, GLOW_STRENGTH, 0)
+    return cv2.addWeighted(out, 1.0, layer, MESH_OPACITY, 0)
+
+
+def crop_square(image, center, size):
+    x, y = center
+    half = size // 2
+    h, w = image.shape[:2]
+    crop = image[max(0, y - half):min(h, y + half), max(0, x - half):min(w, x + half)]
+    if crop.size == 0:
+        return np.zeros((size, size, 3), np.uint8)
+    return cv2.resize(crop, (size, size))
+
+def eye_ratio(pts, idx):
+    hor = np.linalg.norm(pts[idx[0]] - pts[idx[1]])
+    ver = np.linalg.norm(pts[idx[2]] - pts[idx[3]])
+    return ver / hor if hor else 0
