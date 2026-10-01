@@ -203,6 +203,31 @@ def eye_ratio(pts, idx):
             put_text(image, f"STATUS : {status}", (20, 65), TXT)
             put_text(image, f"BLINKS : {blinks}", (20, 90), TXT)
             put_text(image, f"FPS    : {fps:4.1f}", (20, 115), TXT)
+
+cv2.imshow("Face Scanner", image)
+
+            key = cv2.waitKey(1) & 0xFF
+            if key in (27, ord('q')):
+                break
+            elif key == ord('t'):
+                theme_i = (theme_i + 1) % len(theme_names)
+            elif key == ord('w'):
+                show_mesh = not show_mesh
+            elif key == ord('r'):
+                blinks = 0
+                t_start = time.time()
+            elif key == ord('s'):
+                name = f"scan_{int(time.time())}.png"
+                cv2.imwrite(name, image)
+                print("Saved", name)
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+
+if __name__ == "__main__":
+    main()
+
             put_text(image, f"UPTIME : {elapsed // 60:02d}:{elapsed % 60:02d}", (20, 140), TXT)
             put_text(image, "[T] theme  [W] mesh  [R] reset  [S] snap  [Q] quit",
                      (20, h - 20), TXT, 0.5)
