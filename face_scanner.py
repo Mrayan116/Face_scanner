@@ -107,6 +107,27 @@ def main():
     eyes_closed_prev = False
     t_prev, fps = time.time(), 0.0
     t_start = time.time()
+
+   with mp_face_mesh.FaceMesh(max_num_faces=1, refine_landmarks=True,
+                               min_detection_confidence=0.5,
+                               min_tracking_confidence=0.5) as face_mesh:
+        while True:
+            ok, frame = cap.read()
+            if not ok:
+                break
+
+            image = cv2.flip(frame, 1)
+            h, w = image.shape[:2]
+            theme = THEMES[theme_names[theme_i]]
+            MESH, TXT, ACC = theme["mesh"], theme["text"], theme["accent"]
+
+            results = face_mesh.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+
+            # FPS (smoothed)
+            now = time.time()
+            fps = 0.9 * fps + 0.1 * (1 / max(now - t_prev, 1e-6))
+            t_prev = now
+
 def eye_ratio(pts, idx):
     hor = np.linalg.norm(pts[idx[0]] - pts[idx[1]])
     ver = np.linalg.norm(pts[idx[2]] - pts[idx[3]])
